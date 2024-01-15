@@ -1,5 +1,6 @@
 const { test, expect } = require('@jest/globals')
 const { normalizeURL, getURLsFromHTML } = require('./crawl.js')
+const { sortPages } = require('./report.js')
 
 test('Normalize protocol', () => {
     expect(normalizeURL('http://blog.boot.dev/path/')).toBe('blog.boot.dev/path'),
@@ -40,28 +41,51 @@ test('getURLsFromHTML absolute', () => {
     const expected = [ 'https://blog.boot.dev/' ]
     expect(actual).toEqual(expected)
   })
-  
-  test('getURLsFromHTML relative', () => {
-    const inputURL = 'https://blog.boot.dev'
-    const inputBody = '<html><body><a href="/path/one"><span>Boot.dev></span></a></body></html>'
-    const actual = getURLsFromHTML(inputBody, inputURL)
-    const expected = [ 'https://blog.boot.dev/path/one' ]
-    expect(actual).toEqual(expected)
-  })
-  
-  test('getURLsFromHTML both', () => {
-    const inputURL = 'https://blog.boot.dev'
-    const inputBody = '<html><body><a href="/path/one"><span>Boot.dev></span></a><a href="https://other.com/path/one"><span>Boot.dev></span></a></body></html>'
-    const actual = getURLsFromHTML(inputBody, inputURL)
-    const expected = [ 'https://blog.boot.dev/path/one', 'https://other.com/path/one' ]
-    expect(actual).toEqual(expected)
-  })
-  
-  test('getURLsFromHTML handle error', () => {
-    const inputURL = 'https://blog.boot.dev'
-    const inputBody = '<html><body><a href="path/one"><span>Boot.dev></span></a></body></html>'
-    const actual = getURLsFromHTML(inputBody, inputURL)
-    const expected = [ ]
-    expect(actual).toEqual(expected)
-  })
-  
+
+test('getURLsFromHTML relative', () => {
+  const inputURL = 'https://blog.boot.dev'
+  const inputBody = '<html><body><a href="/path/one"><span>Boot.dev></span></a></body></html>'
+  const actual = getURLsFromHTML(inputBody, inputURL)
+  const expected = [ 'https://blog.boot.dev/path/one' ]
+  expect(actual).toEqual(expected)
+})
+
+test('getURLsFromHTML both', () => {
+  const inputURL = 'https://blog.boot.dev'
+  const inputBody = '<html><body><a href="/path/one"><span>Boot.dev></span></a><a href="https://other.com/path/one"><span>Boot.dev></span></a></body></html>'
+  const actual = getURLsFromHTML(inputBody, inputURL)
+  const expected = [ 'https://blog.boot.dev/path/one', 'https://other.com/path/one' ]
+  expect(actual).toEqual(expected)
+})
+
+test('getURLsFromHTML handle error', () => {
+  const inputURL = 'https://blog.boot.dev'
+  const inputBody = '<html><body><a href="path/one"><span>Boot.dev></span></a></body></html>'
+  const actual = getURLsFromHTML(inputBody, inputURL)
+  const expected = [ ]
+  expect(actual).toEqual(expected)
+})
+
+test('Check Sorting', () => {
+  const pages = {
+    'page1': 6,
+    'page2': 5,
+    'page3': 10,
+    'page4': 1000
+  }
+  const actual = sortPages(pages)
+  const expected = [{
+    'url': 'page4',
+    'count': 1000
+  }, {
+    'url': 'page3',
+    'count': 10
+  }, {
+    'url': 'page1',
+    'count': 6
+  }, {
+    'url': 'page2',
+    'count': 5
+  }]
+  expect(actual).toEqual(expected)
+})
